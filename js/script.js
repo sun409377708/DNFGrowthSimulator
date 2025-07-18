@@ -18,31 +18,28 @@ const enhancementSystem = [
 // 游戏状态
 const gameState = {
     currentLevel: 0,
-    crystals: 0,
+    crystals: 100000, // 默认10万结晶体
     totalCost: 0,
     useLuckyCharm: false,
     history: [],
     highestLevel: 0,
-    attemptCount: 0
+    attemptCount: 0,
+    houseSoldCount: 0 // 卖房次数
 };
 
 // DOM元素缓存
 const elements = {
     levelValue: document.querySelector('.level-value'),
     currentLevel: document.getElementById('current-level'),
-    crystalCount: document.getElementById('crystal-count'),
     totalCost: document.getElementById('total-cost'),
     luckyCharm: document.getElementById('lucky-charm'),
     enhanceBtn: document.getElementById('enhance-btn'),
     resetBtn: document.getElementById('reset-btn'),
     successRate: document.getElementById('success-rate'),
-    nextCost: document.getElementById('next-cost'),
     historyLog: document.getElementById('history-log'),
     tabBtns: document.querySelectorAll('.tab-btn'),
     tabContents: document.querySelectorAll('.tab-content'),
     equipmentImage: document.getElementById('equipment-image'),
-    crystalInput: document.getElementById('crystal-input'),
-    addCrystalBtn: document.getElementById('add-crystal-btn'),
     attemptCount: document.getElementById('attempt-count'),
     highestLevel: document.getElementById('highest-level')
 };
@@ -60,14 +57,6 @@ function init() {
     elements.luckyCharm.addEventListener('change', toggleLuckyCharm);
     elements.enhanceBtn.addEventListener('click', enhanceOnce);
     elements.resetBtn.addEventListener('click', resetGame);
-    elements.addCrystalBtn.addEventListener('click', addCrystals);
-    
-    // 为结晶体输入框添加回车键事件
-    elements.crystalInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            addCrystals();
-        }
-    });
     
     // 标签切换
     elements.tabBtns.forEach(btn => {
@@ -118,18 +107,17 @@ function enhanceOnce() {
     
     // 检查结晶体是否足够
     if (gameState.crystals < nextLevel.cost) {
-        addToHistory(`结晶体不足！需要 ${nextLevel.cost} 个`, "fail");
+        // 自动卖房补充结晶体
+        gameState.houseSoldCount++;
+        gameState.crystals += 100000;
         
-        // 弹窗提醒用户是否添加默认数量的结晶体
-        if (confirm(`结晶体不足！\n当前拥有：${gameState.crystals} 个\n需要：${nextLevel.cost} 个\n\n是否添加默认数量 100,000 个结晶体继续增幅？`)) {
-            gameState.crystals += 100000;
-            addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
-            updateHistorySummary();
-            updateUI();
-            
-            // 添加结晶体后重新尝试增幅
-            enhanceOnce();
-        }
+        addToHistory(`已经用掉10万结晶，您该卖房了！`, "fail");
+        addToHistory(`第${gameState.houseSoldCount}套房子已售出，获得 100,000 结晶体`, "normal");
+        updateHistorySummary();
+        updateUI();
+        
+        // 添加结晶体后重新尝试增幅
+        enhanceOnce();
         return;
     }
     
@@ -195,12 +183,13 @@ function enhanceOnce() {
 // 重置游戏
 function resetGame() {
     gameState.currentLevel = 0;
-    gameState.crystals = 0;
+    gameState.crystals = 100000; // 重置为10万结晶体
     gameState.totalCost = 0;
     gameState.history = [];
     gameState.useLuckyCharm = elements.luckyCharm.checked;
     gameState.highestLevel = 0;
     gameState.attemptCount = 0;
+    gameState.houseSoldCount = 0; // 重置卖房次数
     
     elements.historyLog.innerHTML = '';
     updateUI();
@@ -245,55 +234,20 @@ function updateHistorySummary() {
     elements.historyLog.scrollTop = elements.historyLog.scrollHeight;
 }
 
-// 添加结晶体
-function addCrystals() {
-    const inputValue = elements.crystalInput.value.trim();
-    
-    // 检查用户是否输入了结晶体数量
-    if (!inputValue || inputValue === '') {
-        // 弹窗提醒用户没有输入数量，询问是否使用默认值
-        if (confirm('您没有输入结晶体数量！\n是否使用默认数量 100,000 个结晶体？')) {
-            gameState.crystals += 100000;
-            elements.crystalInput.value = '';
-            updateUI();
-            
-            // 添加到历史记录
-            addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
-            updateHistorySummary();
-        }
-        return;
-    }
-    
-    const amount = parseInt(inputValue);
-    if (!isNaN(amount) && amount > 0) {
-        gameState.crystals += amount;
-        elements.crystalInput.value = '';
-        updateUI();
-        
-        // 添加到历史记录
-        addToHistory(`添加了 ${amount} 个结晶体`, "normal");
-        updateHistorySummary();
-    } else {
-        // 输入的不是有效数字
-        alert('请输入有效的结晶体数量（正整数）！');
-    }
-}
+
 
 // 更新UI
 function updateUI() {
     elements.levelValue.textContent = gameState.currentLevel;
     elements.currentLevel.textContent = gameState.currentLevel;
-    elements.crystalCount.textContent = gameState.crystals;
     elements.totalCost.textContent = gameState.totalCost;
     
     if (gameState.currentLevel < 12) {
         const nextLevel = getNextLevelInfo();
-        elements.nextCost.textContent = nextLevel.cost;
         const successRate = getActualSuccessRate(nextLevel.successRate);
         elements.successRate.textContent = `${successRate}%`;
         elements.enhanceBtn.disabled = false;
     } else {
-        elements.nextCost.textContent = "-";
         elements.successRate.textContent = "-";
         elements.enhanceBtn.disabled = true;
     }
