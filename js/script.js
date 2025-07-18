@@ -119,6 +119,17 @@ function enhanceOnce() {
     // 检查结晶体是否足够
     if (gameState.crystals < nextLevel.cost) {
         addToHistory(`结晶体不足！需要 ${nextLevel.cost} 个`, "fail");
+        
+        // 弹窗提醒用户是否添加默认数量的结晶体
+        if (confirm(`结晶体不足！\n当前拥有：${gameState.crystals} 个\n需要：${nextLevel.cost} 个\n\n是否添加默认数量 100,000 个结晶体继续增幅？`)) {
+            gameState.crystals += 100000;
+            addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
+            updateHistorySummary();
+            updateUI();
+            
+            // 添加结晶体后重新尝试增幅
+            enhanceOnce();
+        }
         return;
     }
     
@@ -204,7 +215,17 @@ function enhanceToMax() {
         // 检查结晶体是否足够
         if (gameState.crystals < nextLevel.cost) {
             addToHistory(`结晶体不足！需要 ${nextLevel.cost} 个`, "fail");
-            enhancing = false;
+            
+            // 弹窗提醒用户是否添加默认数量的结晶体
+            if (confirm(`增幅到最高等级过程中结晶体不足！\n当前拥有：${gameState.crystals} 个\n需要：${nextLevel.cost} 个\n\n是否添加默认数量 100,000 个结晶体继续增幅？`)) {
+                gameState.crystals += 100000;
+                addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
+                updateHistorySummary();
+                updateUI();
+                // 继续循环，不退出
+            } else {
+                enhancing = false;
+            }
             break;
         }
         
@@ -305,7 +326,24 @@ function updateHistorySummary() {
 
 // 添加结晶体
 function addCrystals() {
-    const amount = parseInt(elements.crystalInput.value);
+    const inputValue = elements.crystalInput.value.trim();
+    
+    // 检查用户是否输入了结晶体数量
+    if (!inputValue || inputValue === '') {
+        // 弹窗提醒用户没有输入数量，询问是否使用默认值
+        if (confirm('您没有输入结晶体数量！\n是否使用默认数量 100,000 个结晶体？')) {
+            gameState.crystals += 100000;
+            elements.crystalInput.value = '';
+            updateUI();
+            
+            // 添加到历史记录
+            addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
+            updateHistorySummary();
+        }
+        return;
+    }
+    
+    const amount = parseInt(inputValue);
     if (!isNaN(amount) && amount > 0) {
         gameState.crystals += amount;
         elements.crystalInput.value = '';
@@ -314,6 +352,9 @@ function addCrystals() {
         // 添加到历史记录
         addToHistory(`添加了 ${amount} 个结晶体`, "normal");
         updateHistorySummary();
+    } else {
+        // 输入的不是有效数字
+        alert('请输入有效的结晶体数量（正整数）！');
     }
 }
 
