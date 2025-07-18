@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增幅模拟器</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>增幅模拟器</h1>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="simulator">增幅模拟器</button>
+            <button class="tab-btn" data-tab="expectations">数学期望</button>
+            <button class="tab-btn" data-tab="info">增幅说明</button>
+        </div>
+        
+        <div class="tab-content active" id="simulator">
+            <div class="simulator">
+                <div class="equipment">
+                    <div class="equipment-info">
+                        <div class="level-display">
+                            <span class="level-label">增幅等级:</span>
+                            <span class="level-value">0</span>
+                        </div>
+                    </div>
+                    <div class="equipment-visual">
+                        <img src="img/equipment.png" alt="装备" id="equipment-image">
+                        <div class="level-indicator">+<span id="current-level">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="resources">
+                        <div class="resource">
+                            <span>结晶体:</span>
+                            <span id="crystal-count">0</span>
+                        </div>
+                        <div class="resource">
+                            <span>总花费:</span>
+                            <span id="total-cost">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="crystal-input">
+                        <input type="number" id="crystal-input" placeholder="输入结晶体数量" min="0">
+                        <button id="add-crystal-btn">添加结晶体</button>
+                    </div>
+                    
+                    <div class="options">
+                        <label class="toggle">
+                            <input type="checkbox" id="lucky-charm">
+                            <span class="toggle-label">使用幸运符 (+5%成功率)</span>
+                        </label>
+                    </div>
+                    
+                    <div class="buttons">
+                        <button id="enhance-btn">增幅一次</button>
+                        <button id="enhance-max-btn">增幅到最高</button>
+                        <button id="reset-btn">重置</button>
+                    </div>
+                    
+                    <div class="current-chance">
+                        <span>当前成功率: </span>
+                        <span id="success-rate">100%</span>
+                    </div>
+                    
+                    <div class="current-cost">
+                        <span>下次花费: </span>
+                        <span id="next-cost">35</span>
+                        <span> 结晶体</span>
+                    </div>
+                </div>
+                
+                <div class="history">
+                    <h3>增幅历史</h3>
+                    <div id="history-log"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="expectations">
+            <div class="expectations-container">
+                <h2>增幅数学期望</h2>
+                <div class="table-container">
+                    <table id="expectations-table">
+                        <thead>
+                            <tr>
+                                <th>目标等级</th>
+                                <th>不使用幸运符</th>
+                                <th>使用幸运符</th>
+                                <th>收益比</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 由JavaScript填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="explanation">
+                    <h3>期望值说明</h3>
+                    <p>期望值表示从0级增幅到目标等级平均需要消耗的结晶体数量。</p>
+                    <p>收益比表示使用幸运符相对不使用时的结晶体节省百分比。大于1表示使用幸运符更划算。</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="info">
+            <div class="info-container">
+                <h2>增幅系统说明</h2>
+                <table id="info-table">
+                    <thead>
+                        <tr>
+                            <th>目标等级</th>
+                            <th>消耗结晶体</th>
+                            <th>成功概率</th>
+                            <th>失败结果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>35</td><td>100%</td><td>-</td></tr>
+                        <tr><td>2</td><td>53</td><td>100%</td><td>-</td></tr>
+                        <tr><td>3</td><td>73</td><td>100%</td><td>-</td></tr>
+                        <tr><td>4</td><td>97</td><td>100%</td><td>-</td></tr>
+                        <tr><td>5</td><td>126</td><td>80%</td><td>-1级 (20%)</td></tr>
+                        <tr><td>6</td><td>164</td><td>70%</td><td>-1级 (30%)</td></tr>
+                        <tr><td>7</td><td>203</td><td>60%</td><td>-1级 (40%)</td></tr>
+                        <tr><td>8</td><td>280</td><td>70%</td><td>-3级 (30%)</td></tr>
+                        <tr><td>9</td><td>357</td><td>60%</td><td>-3级 (40%)</td></tr>
+                        <tr><td>10</td><td>472</td><td>50%</td><td>-3级 (50%)</td></tr>
+                        <tr><td>11</td><td>587</td><td>40%</td><td>归0 (60%)</td></tr>
+                        <tr><td>12</td><td>646</td><td>33%</td><td>归0 (67%)</td></tr>
+                    </tbody>
+                </table>
+                <div class="charm-info">
+                    <h3>幸运符</h3>
+                    <p>使用幸运符可以提升5%的成功率。</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 DNF手游增幅模拟器 | 仅供娱乐，非官方工具</p>
+        </footer>
+    </div>
+    <script src="js/script.js"></script>
+</body>
+</html>
