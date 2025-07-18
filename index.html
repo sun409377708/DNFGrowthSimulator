@@ -35,6 +35,26 @@
                         <img src="img/equipment.png" alt="装备" id="equipment-image">
                         <div class="level-indicator">+<span id="current-level">0</span></div>
                     </div>
+                    
+                    <!-- 状态指标显示区域 -->
+                    <div class="status-indicators">
+                        <div class="status-item">
+                            <span class="status-label">当前成功率</span>
+                            <span class="status-value" id="success-rate">100%</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">增幅次数</span>
+                            <span class="status-value" id="attempt-count">0</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">最高等级</span>
+                            <span class="status-value" id="highest-level">0</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">总花费</span>
+                            <span class="status-value" id="total-cost">0</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="controls">
@@ -44,8 +64,8 @@
                             <span id="crystal-count">0</span>
                         </div>
                         <div class="resource">
-                            <span>总花费:</span>
-                            <span id="total-cost">0</span>
+                            <span>下次花费:</span>
+                            <span id="next-cost">35</span>
                         </div>
                     </div>
                     
@@ -63,19 +83,7 @@
                     
                     <div class="buttons">
                         <button id="enhance-btn">增幅一次</button>
-                        <button id="enhance-max-btn">增幅到最高</button>
                         <button id="reset-btn">重置</button>
-                    </div>
-                    
-                    <div class="current-chance">
-                        <span>当前成功率: </span>
-                        <span id="success-rate">100%</span>
-                    </div>
-                    
-                    <div class="current-cost">
-                        <span>下次花费: </span>
-                        <span id="next-cost">35</span>
-                        <span> 结晶体</span>
                     </div>
                 </div>
                 

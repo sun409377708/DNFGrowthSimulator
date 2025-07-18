@@ -34,7 +34,6 @@ const elements = {
     totalCost: document.getElementById('total-cost'),
     luckyCharm: document.getElementById('lucky-charm'),
     enhanceBtn: document.getElementById('enhance-btn'),
-    enhanceMaxBtn: document.getElementById('enhance-max-btn'),
     resetBtn: document.getElementById('reset-btn'),
     successRate: document.getElementById('success-rate'),
     nextCost: document.getElementById('next-cost'),
@@ -43,7 +42,9 @@ const elements = {
     tabContents: document.querySelectorAll('.tab-content'),
     equipmentImage: document.getElementById('equipment-image'),
     crystalInput: document.getElementById('crystal-input'),
-    addCrystalBtn: document.getElementById('add-crystal-btn')
+    addCrystalBtn: document.getElementById('add-crystal-btn'),
+    attemptCount: document.getElementById('attempt-count'),
+    highestLevel: document.getElementById('highest-level')
 };
 
 // 初始化
@@ -58,7 +59,6 @@ function init() {
     // 事件监听
     elements.luckyCharm.addEventListener('change', toggleLuckyCharm);
     elements.enhanceBtn.addEventListener('click', enhanceOnce);
-    elements.enhanceMaxBtn.addEventListener('click', enhanceToMax);
     elements.resetBtn.addEventListener('click', resetGame);
     elements.addCrystalBtn.addEventListener('click', addCrystals);
     
@@ -192,85 +192,6 @@ function enhanceOnce() {
     updateHistorySummary();
 }
 
-// 增幅到最高等级
-function enhanceToMax() {
-    let enhancing = true;
-    let iterations = 0;
-    const maxIterations = 1000; // 安全检查，防止无限循环
-    
-    while (enhancing && iterations < maxIterations) {
-        iterations++;
-        
-        // 增加尝试次数
-        gameState.attemptCount++;
-        
-        if (gameState.currentLevel >= 12) {
-            addToHistory("已经达到最高等级 +12！", "normal");
-            enhancing = false;
-            break;
-        }
-        
-        const nextLevel = getNextLevelInfo();
-        
-        // 检查结晶体是否足够
-        if (gameState.crystals < nextLevel.cost) {
-            addToHistory(`结晶体不足！需要 ${nextLevel.cost} 个`, "fail");
-            
-            // 弹窗提醒用户是否添加默认数量的结晶体
-            if (confirm(`增幅到最高等级过程中结晶体不足！\n当前拥有：${gameState.crystals} 个\n需要：${nextLevel.cost} 个\n\n是否添加默认数量 100,000 个结晶体继续增幅？`)) {
-                gameState.crystals += 100000;
-                addToHistory(`系统默认添加了 100,000 个结晶体`, "normal");
-                updateHistorySummary();
-                updateUI();
-                // 继续循环，不退出
-            } else {
-                enhancing = false;
-            }
-            break;
-        }
-        
-        // 扣除结晶体
-        gameState.crystals -= nextLevel.cost;
-        gameState.totalCost += nextLevel.cost;
-        
-        // 计算增幅结果
-        const successRate = getActualSuccessRate(nextLevel.successRate);
-        const roll = Math.random() * 100;
-        const isSuccess = roll < successRate;
-        
-        if (isSuccess) {
-            // 增幅成功
-            gameState.currentLevel++;
-            
-            // 更新最高等级
-            if (gameState.currentLevel > gameState.highestLevel) {
-                gameState.highestLevel = gameState.currentLevel;
-            }
-            
-            addToHistory(`增幅成功！+${gameState.currentLevel}`, "success");
-        } else {
-            // 增幅失败
-            const failResult = nextLevel.failResult;
-            let resultMessage = "";
-            
-            if (failResult.type === 'level') {
-                // 降低等级
-                gameState.currentLevel = Math.max(0, gameState.currentLevel + failResult.value);
-                resultMessage = `失败！等级降低到 +${gameState.currentLevel}`;
-            } else if (failResult.type === 'reset') {
-                // 重置到0
-                gameState.currentLevel = 0;
-                resultMessage = "失败！等级重置到 +0";
-            }
-            
-            addToHistory(resultMessage, "fail");
-        }
-    }
-    
-    updateUI();
-    updateHistorySummary();
-}
-
 // 重置游戏
 function resetGame() {
     gameState.currentLevel = 0;
@@ -371,13 +292,13 @@ function updateUI() {
         const successRate = getActualSuccessRate(nextLevel.successRate);
         elements.successRate.textContent = `${successRate}%`;
         elements.enhanceBtn.disabled = false;
-        elements.enhanceMaxBtn.disabled = false;
     } else {
         elements.nextCost.textContent = "-";
         elements.successRate.textContent = "-";
         elements.enhanceBtn.disabled = true;
-        elements.enhanceMaxBtn.disabled = true;
     }
+    elements.attemptCount.textContent = gameState.attemptCount;
+    elements.highestLevel.textContent = gameState.highestLevel;
 }
 
 // 计算数学期望

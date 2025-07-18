@@ -153,6 +153,41 @@ header h1 {
     box-shadow: 0 2px 10px rgba(255, 107, 107, 0.4);
 }
 
+/* 状态指标区域 */
+.status-indicators {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-item {
+    text-align: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-label {
+    display: block;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.status-value {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #00d4ff;
+}
+
 /* 资源显示 */
 .resources {
     background: rgba(0, 0, 0, 0.3);
@@ -274,27 +309,28 @@ header h1 {
 /* 按钮组 */
 .buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 12px;
     margin-bottom: 20px;
 }
 
 .buttons button {
-    padding: 16px 20px;
+    padding: 12px 18px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex: 1;
     /* 移动端优化 */
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-    min-height: 56px;
+    min-height: 44px;
     user-select: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
 }
 
 #enhance-btn {
@@ -307,16 +343,6 @@ header h1 {
     box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
 }
 
-#enhance-max-btn {
-    background: linear-gradient(135deg, #4ecdc4, #44a08d);
-    color: #ffffff;
-}
-
-#enhance-max-btn:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
-}
-
 #reset-btn {
     background: linear-gradient(135deg, #ff6b6b, #ee5a52);
     color: #ffffff;
@@ -325,24 +351,6 @@ header h1 {
 #reset-btn:active {
     transform: translateY(1px);
     box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
-}
-
-/* 当前状态显示 */
-.current-chance,
-.current-cost {
-    background: rgba(0, 0, 0, 0.3);
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-}
-
-.current-chance span:last-child,
-.current-cost span:nth-child(2) {
-    color: #00d4ff;
-    font-weight: 700;
 }
 
 /* 历史记录 */
