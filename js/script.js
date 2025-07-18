@@ -233,16 +233,7 @@ function getBathServiceLevel(money) {
     return "神级待遇+超凡脱俗";
 }
 
-// 计算单次增幅所需幸运符数量
-function getLuckyCharmCost(targetLevel) {
-    if (targetLevel <= 4) {
-        return 0; // 0-4级不消耗幸运符
-    } else if (targetLevel <= 10) {
-        return 1; // 5-10级每次消耗1张
-    } else {
-        return 2; // 11-15级每次消耗2张
-    }
-}
+
 
 // 更新结晶兑换比例
 function updateCrystalRate() {
@@ -307,8 +298,8 @@ function calculateExpectations() {
     // 使用幸运符的期望
     const expectationsWithCharm = calculateExpectedCosts(true);
     
-    // 使用幸运符的期望幸运符消耗
-    const expectedLuckyCharmCosts = calculateExpectedLuckyCharmCosts();
+    // 不使用幸运符的期望次数
+    const expectedAttemptsWithoutCharm = calculateExpectedAttempts(false);
     
     // 填充表格
     for (let level = 1; level <= 15; level++) {
@@ -323,36 +314,14 @@ function calculateExpectations() {
         const withCharmCell = document.createElement('td');
         withCharmCell.textContent = Math.round(expectationsWithCharm[level]);
         
-        const ratioCell = document.createElement('td');
-        const ratio = expectationsWithoutCharm[level] / expectationsWithCharm[level];
-        ratioCell.textContent = ratio.toFixed(2);
-        
-        // 添加颜色提示：绿色表示使用幸运符更划算，红色表示不使用更划算
-        if (ratio > 1) {
-            ratioCell.style.color = '#28a745'; // 绿色
-            ratioCell.textContent += ' ✓';
-        } else if (ratio < 1) {
-            ratioCell.style.color = '#dc3545'; // 红色
-            ratioCell.textContent += ' ✗';
-        }
-        
-        // 单级期望消耗（从level-1到level的期望消耗）
-        const singleLevelCostCell = document.createElement('td');
-        const singleLevelExpected = level === 1 ? 
-            expectationsWithoutCharm[1] : 
-            expectationsWithoutCharm[level] - expectationsWithoutCharm[level - 1];
-        singleLevelCostCell.textContent = Math.round(singleLevelExpected);
-        
-        // 幸运符期望消耗
-        const luckyCharmCostCell = document.createElement('td');
-        luckyCharmCostCell.textContent = Math.round(expectedLuckyCharmCosts[level] * 10) / 10; // 保留一位小数
+        // 增幅期望次数（期望增幅次数，考虑失败概率）
+        const totalAttemptsCell = document.createElement('td');
+        totalAttemptsCell.textContent = Math.round(expectedAttemptsWithoutCharm[level]);
         
         row.appendChild(levelCell);
         row.appendChild(withoutCharmCell);
         row.appendChild(withCharmCell);
-        row.appendChild(ratioCell);
-        row.appendChild(singleLevelCostCell);
-        row.appendChild(luckyCharmCostCell);
+        row.appendChild(totalAttemptsCell);
         
         tableBody.appendChild(row);
     }
@@ -367,57 +336,61 @@ function calculateExpectedCosts(useCharm) {
         expectedCosts[targetLevel] = calculateExpectedCostToLevel(targetLevel, useCharm);
     }
     
-    return expectedCosts;
+        return expectedCosts;
 }
 
-// 计算期望幸运符消耗
-function calculateExpectedLuckyCharmCosts() {
-    const expectedCharmCosts = new Array(16).fill(0);
+// 计算期望增幅次数
+function calculateExpectedAttempts(useCharm) {
+    const expectedAttempts = new Array(16).fill(0);
     
-    // 从1级开始计算到15级的期望幸运符消耗
+    // 从1级开始计算到15级的期望次数
     for (let targetLevel = 1; targetLevel <= 15; targetLevel++) {
-        expectedCharmCosts[targetLevel] = calculateExpectedLuckyCharmToLevel(targetLevel);
+        expectedAttempts[targetLevel] = calculateExpectedAttemptsToLevel(targetLevel, useCharm);
     }
     
-    return expectedCharmCosts;
+    return expectedAttempts;
 }
 
-// 计算从0级到指定等级的期望幸运符花费
-function calculateExpectedLuckyCharmToLevel(targetLevel) {
-    // 动态规划数组，dp[i]表示从0级到i级的期望幸运符花费
+// 计算从0级到指定等级的期望增幅次数
+function calculateExpectedAttemptsToLevel(targetLevel, useCharm) {
+    // 动态规划数组，dp[i]表示从0级到i级的期望增幅次数
     const dp = new Array(targetLevel + 1).fill(0);
     
-    // 基本情况：到达0级的成本为0
+    // 基本情况：到达0级的次数为0
     dp[0] = 0;
     
-    // 逐级计算期望值
+    // 逐级计算期望次数
     for (let level = 1; level <= targetLevel; level++) {
         const currentConfig = enhancementSystem[level];
-        const charmCost = getLuckyCharmCost(level);
+        const baseSuccessRate = currentConfig.successRate;
+        const successRate = useCharm ? Math.min(baseSuccessRate + 5, 100) : baseSuccessRate;
         
-        if (currentConfig.successRate === 100) {
-            // 100%成功率，直接累加
-            dp[level] = dp[level - 1] + charmCost;
+        if (successRate === 100) {
+            // 100%成功率的情况
+            dp[level] = dp[level - 1] + 1;
         } else {
-            // 需要考虑失败的情况
-            const successRate = getActualSuccessRate(currentConfig.successRate);
-            const failRate = 100 - successRate;
-            
-            let expectedCost = 0;
+            // 计算失败后的目标等级
+            let failTargetLevel = 0;
             
             if (currentConfig.failResult.type === 'level') {
-                // 失败会降级
-                const targetAfterFail = Math.max(0, level + currentConfig.failResult.value);
-                expectedCost = (charmCost + successRate/100 * 0 + failRate/100 * dp[targetAfterFail]) / (successRate/100);
+                // 失败降低等级
+                failTargetLevel = Math.max(0, level + currentConfig.failResult.value);
             } else if (currentConfig.failResult.type === 'reset') {
-                // 失败会归零
-                expectedCost = (charmCost + successRate/100 * 0 + failRate/100 * dp[0]) / (successRate/100);
-            } else {
-                // 失败无惩罚
-                expectedCost = charmCost / (successRate/100);
+                // 失败重置到0
+                failTargetLevel = 0;
             }
             
-            dp[level] = dp[level - 1] + expectedCost;
+            // 期望次数计算
+            const p = successRate / 100;
+            
+            // 从level-1到level的期望次数
+            // 每次尝试，成功概率为p
+            // 失败后回到failTargetLevel，需要额外的(dp[level-1] - dp[failTargetLevel])次重新回到level-1
+            // 期望次数 = 1/p + (1-p)/p * (dp[level-1] - dp[failTargetLevel])
+            
+            const expectedAttemptsThisLevel = 1 / p + (1 - p) / p * (dp[level - 1] - dp[failTargetLevel]);
+            
+            dp[level] = dp[level - 1] + expectedAttemptsThisLevel;
         }
     }
     
@@ -438,30 +411,34 @@ function calculateExpectedCostToLevel(targetLevel, useCharm) {
         const cost = currentConfig.cost;
         const baseSuccessRate = currentConfig.successRate;
         const successRate = useCharm ? Math.min(baseSuccessRate + 5, 100) : baseSuccessRate;
-        const failRate = 100 - successRate;
         
-        if (failRate === 0) {
+        if (successRate === 100) {
             // 100%成功率的情况
             dp[level] = dp[level - 1] + cost;
         } else {
-            // 计算失败后的期望
-            let failExpectation = 0;
+            // 计算失败后的目标等级
+            let failTargetLevel = 0;
             
             if (currentConfig.failResult.type === 'level') {
                 // 失败降低等级
-                const newLevel = Math.max(0, level - 1 + currentConfig.failResult.value);
-                failExpectation = dp[newLevel];
+                failTargetLevel = Math.max(0, level + currentConfig.failResult.value);
             } else if (currentConfig.failResult.type === 'reset') {
                 // 失败重置到0
-                failExpectation = dp[0];
+                failTargetLevel = 0;
             }
             
-            // 期望公式：E = 成本 + (失败概率 * (失败后继续尝试的期望))
-            // 对于成功概率p，失败概率q=1-p，成本为c，
-            // E = c + q*E => E = c / (1 - q) = c / p
-            dp[level] = dp[level - 1] + cost + (failRate / 100) * (failExpectation - dp[level - 1] + dp[level]);
-            dp[level] = cost + (failRate / 100) * (failExpectation) + (successRate / 100) * dp[level - 1];
-            dp[level] = (cost + (failRate / 100) * failExpectation + (successRate / 100) * dp[level - 1]) / (1 - (failRate / 100) * 0);
+            // 简单直接的期望公式
+            const p = successRate / 100;
+            
+            // 从level-1到level的期望成本
+            // 每次尝试消耗cost，成功概率为p
+            // 失败后回到failTargetLevel，需要额外的(dp[level-1] - dp[failTargetLevel])成本重新回到level-1
+            // 期望尝试次数 = 1/p
+            // 期望总成本 = cost/p + (1-p)/p * (dp[level-1] - dp[failTargetLevel])
+            
+            const expectedCostThisLevel = cost / p + (1 - p) / p * (dp[level - 1] - dp[failTargetLevel]);
+            
+            dp[level] = dp[level - 1] + expectedCostThisLevel;
         }
     }
     
