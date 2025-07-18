@@ -3,6 +3,20 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* 禁用移动端双击缩放 */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 移动端优化 */
+html {
+    /* 禁用双击缩放 */
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    /* 防止iOS Safari的自动缩放 */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
 }
 
 body {
@@ -12,6 +26,10 @@ body {
     background-color: #121212;
     background-image: linear-gradient(135deg, #121212 0%, #1f1f1f 100%);
     min-height: 100vh;
+    /* 防止橡皮筋效果 */
+    overscroll-behavior: none;
+    /* 优化滚动性能 */
+    -webkit-overflow-scrolling: touch;
 }
 
 .container {
@@ -49,10 +67,17 @@ header h1 {
     background: #2a2a2a;
     cursor: pointer;
     font-size: 1rem;
+    transition: all 0.3s;
+    color: #ccc;
     font-weight: bold;
-    transition: all 0.3s ease;
     flex: 1;
-    color: #bbb;
+    /* 移动端优化 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    user-select: none;
 }
 
 .tab-btn.active {
@@ -176,6 +201,12 @@ header h1 {
     background-color: #333;
     color: #e1e1e1;
     font-size: 1rem;
+    /* 移动端优化 */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 44px;
+    /* 防止iOS缩放 */
+    font-size: 16px;
 }
 
 .crystal-input input:focus {
@@ -185,14 +216,21 @@ header h1 {
 }
 
 .crystal-input button {
+    background-color: #00a8ff;
+    color: #121212;
     padding: 10px 15px;
     border: none;
     border-radius: 6px;
-    background-color: #00a8ff;
-    color: #121212;
-    font-weight: bold;
     cursor: pointer;
+    font-weight: bold;
     transition: all 0.2s;
+    /* 移动端优化 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    min-height: 44px;
+    user-select: none;
 }
 
 .crystal-input button:hover {
@@ -268,6 +306,15 @@ header h1 {
     flex: 1;
     transition: all 0.2s;
     min-width: 110px;
+    /* 移动端优化 */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    /* 增加触摸区域，提升用户体验 */
+    min-height: 44px;
+    /* 禁用文本选择 */
+    user-select: none;
 }
 
 #enhance-btn {
@@ -483,4 +530,99 @@ footer {
     margin-top: 20px;
     padding: 20px;
     color: #888;
+}
+
+/* 移动端响应式设计和优化 */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .tabs {
+        flex-direction: column;
+        border-radius: 8px;
+    }
+    
+    .tab-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .simulator {
+        padding: 15px;
+    }
+    
+    .resources {
+        flex-direction: column;
+        gap: 10px;
+        font-size: 1rem;
+    }
+    
+    .buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .buttons button {
+        min-height: 48px;
+        font-size: 1rem;
+        padding: 14px 20px;
+    }
+    
+    .crystal-input {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .crystal-input input,
+    .crystal-input button {
+        min-height: 48px;
+        font-size: 16px; /* 防止iOS缩放 */
+    }
+    
+    .history-log {
+        max-height: 200px;
+    }
+    
+    /* 优化表格在移动端的显示 */
+    .expectations-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .expectations-table {
+        min-width: 500px;
+    }
+}
+
+/* 防止意外的双击缩放和选择 */
+.equipment, .level-display, .info-display {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+/* 优化滚动条在移动端的显示 */
+.history-log::-webkit-scrollbar {
+    width: 6px;
+}
+
+.history-log::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 3px;
+}
+
+.history-log::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+.history-log::-webkit-scrollbar-thumb:hover {
+    background: #777;
 }
