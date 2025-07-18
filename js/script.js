@@ -12,7 +12,30 @@ const enhancementSystem = [
     { level: 9, cost: 357, successRate: 60, failResult: { type: 'level', value: -3 } },
     { level: 10, cost: 472, successRate: 50, failResult: { type: 'level', value: -3 } },
     { level: 11, cost: 587, successRate: 40, failResult: { type: 'reset', value: 0 } },
-    { level: 12, cost: 646, successRate: 33, failResult: { type: 'reset', value: 0 } }
+    { level: 12, cost: 646, successRate: 30, failResult: { type: 'reset', value: 0 } },
+    { level: 13, cost: 800, successRate: 25, failResult: { type: 'reset', value: 0 } },
+    { level: 14, cost: 1000, successRate: 20, failResult: { type: 'reset', value: 0 } },
+    { level: 15, cost: 1250, successRate: 15, failResult: { type: 'reset', value: 0 } }
+];
+
+// 洗浴中心消费档位
+const bathServiceLevels = [
+    { minPrice: 100, maxPrice: 299, service: "基础搓澡+简单按摩" },
+    { minPrice: 300, maxPrice: 499, service: "精油按摩+足疗套餐" },
+    { minPrice: 500, maxPrice: 699, service: "全身SPA+深度护理" },
+    { minPrice: 700, maxPrice: 999, service: "贵宾套房+专业技师" },
+    { minPrice: 1000, maxPrice: 1499, service: "豪华包间+双人服务" },
+    { minPrice: 1500, maxPrice: 1999, service: "至尊体验+私人定制" },
+    { minPrice: 2000, maxPrice: 2999, service: "皇家套餐+全程管家" },
+    { minPrice: 3000, maxPrice: 4999, service: "顶级会所+专属服务" },
+    { minPrice: 5000, maxPrice: 7999, service: "奢华殿堂+VIP待遇" },
+    { minPrice: 8000, maxPrice: 9999, service: "至尊享受+贵族体验" },
+    { minPrice: 10000, maxPrice: 14999, service: "帝王级服务+私人团队" },
+    { minPrice: 15000, maxPrice: 19999, service: "传说级体验+天堂享受" },
+    { minPrice: 20000, maxPrice: 29999, service: "神话级待遇+皇室规格" },
+    { minPrice: 30000, maxPrice: 39999, service: "史诗级服务+完美人生" },
+    { minPrice: 40000, maxPrice: 49999, service: "传奇级享受+巅峰体验" },
+    { minPrice: 50000, maxPrice: 999999, service: "神级待遇+超凡脱俗" }
 ];
 
 // 游戏状态
@@ -24,7 +47,8 @@ const gameState = {
     history: [],
     highestLevel: 0,
     attemptCount: 0,
-    houseSoldCount: 0 // 卖房次数
+    houseSoldCount: 0, // 卖房次数
+    crystalToTeraRate: 1000 // 结晶兑换泰拉比例
 };
 
 // DOM元素缓存
@@ -36,19 +60,23 @@ const elements = {
     enhanceBtn: document.getElementById('enhance-btn'),
     resetBtn: document.getElementById('reset-btn'),
     successRate: document.getElementById('success-rate'),
-    historyLog: document.getElementById('history-log'),
     tabBtns: document.querySelectorAll('.tab-btn'),
     tabContents: document.querySelectorAll('.tab-content'),
     equipmentImage: document.getElementById('equipment-image'),
     attemptCount: document.getElementById('attempt-count'),
-    highestLevel: document.getElementById('highest-level')
+    highestLevel: document.getElementById('highest-level'),
+    crystalRate: document.getElementById('crystal-rate'),
+    totalTera: document.getElementById('total-tera'),
+    totalMoney: document.getElementById('total-money'),
+    summerSets: document.getElementById('summer-sets'),
+    bathLevel: document.getElementById('bath-level')
 };
 
 // 初始化
 function init() {
     updateUI();
     calculateExpectations();
-    updateHistorySummary();
+    updateConsumptionStats();
     
     // 使用本地装备图片
     elements.equipmentImage.src = "img/equipment.png";
@@ -57,6 +85,7 @@ function init() {
     elements.luckyCharm.addEventListener('change', toggleLuckyCharm);
     elements.enhanceBtn.addEventListener('click', enhanceOnce);
     elements.resetBtn.addEventListener('click', resetGame);
+    elements.crystalRate.addEventListener('input', updateCrystalRate);
     
     // 标签切换
     elements.tabBtns.forEach(btn => {
@@ -98,8 +127,7 @@ function getActualSuccessRate(baseSuccessRate) {
 
 // 增幅一次
 function enhanceOnce() {
-    if (gameState.currentLevel >= 12) {
-        addToHistory("已经达到最高等级 +12！", "normal");
+    if (gameState.currentLevel >= 15) {
         return;
     }
     
@@ -110,10 +138,7 @@ function enhanceOnce() {
         // 自动卖房补充结晶体
         gameState.houseSoldCount++;
         gameState.crystals += 100000;
-        
-        addToHistory(`已经用掉10万结晶，您该卖房了！`, "fail");
-        addToHistory(`第${gameState.houseSoldCount}套房子已售出，获得 100,000 结晶体`, "normal");
-        updateHistorySummary();
+        updateConsumptionStats();
         updateUI();
         
         // 添加结晶体后重新尝试增幅
@@ -133,7 +158,7 @@ function enhanceOnce() {
     equipmentElement.classList.add('enhance-animation');
     setTimeout(() => {
         equipmentElement.classList.remove('enhance-animation');
-    }, 500);
+    }, 800);
     
     // 计算增幅结果
     const successRate = getActualSuccessRate(nextLevel.successRate);
@@ -148,12 +173,10 @@ function enhanceOnce() {
         if (gameState.currentLevel > gameState.highestLevel) {
             gameState.highestLevel = gameState.currentLevel;
         }
-        
-        addToHistory(`增幅成功！+${gameState.currentLevel}`, "success");
         equipmentElement.classList.add('success-animation');
         setTimeout(() => {
             equipmentElement.classList.remove('success-animation');
-        }, 1000);
+        }, 1800);
     } else {
         // 增幅失败
         const failResult = nextLevel.failResult;
@@ -169,15 +192,14 @@ function enhanceOnce() {
             resultMessage = "失败！等级重置到 +0";
         }
         
-        addToHistory(resultMessage, "fail");
         equipmentElement.classList.add('fail-animation');
         setTimeout(() => {
             equipmentElement.classList.remove('fail-animation');
-        }, 1000);
+        }, 1500);
     }
     
     updateUI();
-    updateHistorySummary();
+    updateConsumptionStats();
 }
 
 // 重置游戏
@@ -190,49 +212,67 @@ function resetGame() {
     gameState.highestLevel = 0;
     gameState.attemptCount = 0;
     gameState.houseSoldCount = 0; // 重置卖房次数
+    gameState.crystalToTeraRate = parseInt(elements.crystalRate.value) || 1000; // 重置兑换比例
     
-    elements.historyLog.innerHTML = '';
     updateUI();
-    updateHistorySummary();
+    updateConsumptionStats();
 }
 
-// 添加历史记录
-function addToHistory(message, type) {
-    // 不再显示每次增幅的详细记录，只在日志中保存
-    gameState.history.push({
-        message: message,
-        type: type,
-        timestamp: new Date().toLocaleTimeString()
-    });
-}
-
-// 更新历史记录摘要
-function updateHistorySummary() {
-    // 清空历史记录显示
-    elements.historyLog.innerHTML = '';
-    
-    // 创建最高等级记录
-    const highestLevelItem = document.createElement('div');
-    highestLevelItem.className = 'history-item success';
-    highestLevelItem.textContent = `最高增幅等级: +${gameState.highestLevel}`;
-    elements.historyLog.appendChild(highestLevelItem);
-    
-    // 创建尝试次数记录
-    const attemptCountItem = document.createElement('div');
-    attemptCountItem.className = 'history-item normal';
-    attemptCountItem.textContent = `增幅尝试次数: ${gameState.attemptCount}次`;
-    elements.historyLog.appendChild(attemptCountItem);
-    
-    // 如果当前等级不是最高等级，显示当前等级
-    if (gameState.currentLevel !== gameState.highestLevel) {
-        const currentLevelItem = document.createElement('div');
-        currentLevelItem.className = 'history-item normal';
-        currentLevelItem.textContent = `当前等级: +${gameState.currentLevel}`;
-        elements.historyLog.appendChild(currentLevelItem);
+// 获取洗浴服务档位
+function getBathServiceLevel(money) {
+    if (money < 100) {
+        return "暂无消费";
     }
     
-    elements.historyLog.scrollTop = elements.historyLog.scrollHeight;
+    for (let level of bathServiceLevels) {
+        if (money >= level.minPrice && money <= level.maxPrice) {
+            return level.service;
+        }
+    }
+    
+    return "神级待遇+超凡脱俗";
 }
+
+// 计算单次增幅所需幸运符数量
+function getLuckyCharmCost(targetLevel) {
+    if (targetLevel <= 4) {
+        return 0; // 0-4级不消耗幸运符
+    } else if (targetLevel <= 10) {
+        return 1; // 5-10级每次消耗1张
+    } else {
+        return 2; // 11-15级每次消耗2张
+    }
+}
+
+// 更新结晶兑换比例
+function updateCrystalRate() {
+    gameState.crystalToTeraRate = parseInt(elements.crystalRate.value) || 1000;
+    updateConsumptionStats();
+}
+
+// 更新消费统计
+function updateConsumptionStats() {
+    // 计算总泰拉消耗
+    const totalTera = gameState.totalCost * gameState.crystalToTeraRate;
+    const totalTeraInWan = Math.round(totalTera / 10000 * 100) / 100; // 保留两位小数
+    
+    // 计算总金额 (30万泰拉 = 200元)
+    const totalMoney = Math.round(totalTera / 300000 * 200);
+    
+    // 计算夏日套数量 (200元 = 1个夏日套)
+    const summerSetsCount = Math.round(totalMoney / 200 * 10) / 10; // 保留一位小数
+    
+    // 获取洗浴服务档位
+    const bathService = getBathServiceLevel(totalMoney);
+    
+    // 更新显示
+    elements.totalTera.textContent = totalTeraInWan;
+    elements.totalMoney.textContent = totalMoney;
+    elements.summerSets.textContent = summerSetsCount;
+    elements.bathLevel.textContent = bathService;
+}
+
+
 
 
 
@@ -242,7 +282,7 @@ function updateUI() {
     elements.currentLevel.textContent = gameState.currentLevel;
     elements.totalCost.textContent = gameState.totalCost;
     
-    if (gameState.currentLevel < 12) {
+    if (gameState.currentLevel < 15) {
         const nextLevel = getNextLevelInfo();
         const successRate = getActualSuccessRate(nextLevel.successRate);
         elements.successRate.textContent = `${successRate}%`;
@@ -267,8 +307,11 @@ function calculateExpectations() {
     // 使用幸运符的期望
     const expectationsWithCharm = calculateExpectedCosts(true);
     
+    // 使用幸运符的期望幸运符消耗
+    const expectedLuckyCharmCosts = calculateExpectedLuckyCharmCosts();
+    
     // 填充表格
-    for (let level = 1; level <= 12; level++) {
+    for (let level = 1; level <= 15; level++) {
         const row = document.createElement('tr');
         
         const levelCell = document.createElement('td');
@@ -293,10 +336,23 @@ function calculateExpectations() {
             ratioCell.textContent += ' ✗';
         }
         
+        // 单级期望消耗（从level-1到level的期望消耗）
+        const singleLevelCostCell = document.createElement('td');
+        const singleLevelExpected = level === 1 ? 
+            expectationsWithoutCharm[1] : 
+            expectationsWithoutCharm[level] - expectationsWithoutCharm[level - 1];
+        singleLevelCostCell.textContent = Math.round(singleLevelExpected);
+        
+        // 幸运符期望消耗
+        const luckyCharmCostCell = document.createElement('td');
+        luckyCharmCostCell.textContent = Math.round(expectedLuckyCharmCosts[level] * 10) / 10; // 保留一位小数
+        
         row.appendChild(levelCell);
         row.appendChild(withoutCharmCell);
         row.appendChild(withCharmCell);
         row.appendChild(ratioCell);
+        row.appendChild(singleLevelCostCell);
+        row.appendChild(luckyCharmCostCell);
         
         tableBody.appendChild(row);
     }
@@ -304,14 +360,68 @@ function calculateExpectations() {
 
 // 计算期望成本
 function calculateExpectedCosts(useCharm) {
-    const expectedCosts = new Array(13).fill(0);
+    const expectedCosts = new Array(16).fill(0);
     
-    // 从1级开始计算到12级的期望值
-    for (let targetLevel = 1; targetLevel <= 12; targetLevel++) {
+    // 从1级开始计算到15级的期望值
+    for (let targetLevel = 1; targetLevel <= 15; targetLevel++) {
         expectedCosts[targetLevel] = calculateExpectedCostToLevel(targetLevel, useCharm);
     }
     
     return expectedCosts;
+}
+
+// 计算期望幸运符消耗
+function calculateExpectedLuckyCharmCosts() {
+    const expectedCharmCosts = new Array(16).fill(0);
+    
+    // 从1级开始计算到15级的期望幸运符消耗
+    for (let targetLevel = 1; targetLevel <= 15; targetLevel++) {
+        expectedCharmCosts[targetLevel] = calculateExpectedLuckyCharmToLevel(targetLevel);
+    }
+    
+    return expectedCharmCosts;
+}
+
+// 计算从0级到指定等级的期望幸运符花费
+function calculateExpectedLuckyCharmToLevel(targetLevel) {
+    // 动态规划数组，dp[i]表示从0级到i级的期望幸运符花费
+    const dp = new Array(targetLevel + 1).fill(0);
+    
+    // 基本情况：到达0级的成本为0
+    dp[0] = 0;
+    
+    // 逐级计算期望值
+    for (let level = 1; level <= targetLevel; level++) {
+        const currentConfig = enhancementSystem[level];
+        const charmCost = getLuckyCharmCost(level);
+        
+        if (currentConfig.successRate === 100) {
+            // 100%成功率，直接累加
+            dp[level] = dp[level - 1] + charmCost;
+        } else {
+            // 需要考虑失败的情况
+            const successRate = getActualSuccessRate(currentConfig.successRate);
+            const failRate = 100 - successRate;
+            
+            let expectedCost = 0;
+            
+            if (currentConfig.failResult.type === 'level') {
+                // 失败会降级
+                const targetAfterFail = Math.max(0, level + currentConfig.failResult.value);
+                expectedCost = (charmCost + successRate/100 * 0 + failRate/100 * dp[targetAfterFail]) / (successRate/100);
+            } else if (currentConfig.failResult.type === 'reset') {
+                // 失败会归零
+                expectedCost = (charmCost + successRate/100 * 0 + failRate/100 * dp[0]) / (successRate/100);
+            } else {
+                // 失败无惩罚
+                expectedCost = charmCost / (successRate/100);
+            }
+            
+            dp[level] = dp[level - 1] + expectedCost;
+        }
+    }
+    
+    return dp[targetLevel];
 }
 
 // 计算从0级到指定等级的期望花费

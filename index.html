@@ -71,9 +71,18 @@
                     </div>
                 </div>
                 
-                <div class="history">
-                    <h3>增幅历史</h3>
-                    <div id="history-log"></div>
+                <div class="consumption-stats">
+                    <h3>消费统计</h3>
+                    <div class="exchange-rate">
+                        <label for="crystal-rate">结晶兑换比例:</label>
+                        <input type="number" id="crystal-rate" value="1000" min="100" max="10000" step="100">
+                        <span>泰拉/结晶</span>
+                    </div>
+                    <div class="stats-info">
+                        <p>当前总消耗: <span id="total-tera">0</span>万泰拉</p>
+                        <p>约 <span id="total-money">0</span>元 (相当于<span id="summer-sets">0</span>个夏日套)</p>
+                        <p class="bath-service">消费档位: <span id="bath-level">暂无消费</span></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,9 +95,11 @@
                         <thead>
                             <tr>
                                 <th>目标等级</th>
-                                <th>不使用幸运符</th>
-                                <th>使用幸运符</th>
+                                <th>累积期望(无符)</th>
+                                <th>累积期望(有符)</th>
                                 <th>收益比</th>
+                                <th>单级期望</th>
+                                <th>幸运符消耗</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,8 +109,10 @@
                 </div>
                 <div class="explanation">
                     <h3>期望值说明</h3>
-                    <p>期望值表示从0级增幅到目标等级平均需要消耗的结晶体数量。</p>
-                    <p>收益比表示使用幸运符相对不使用时的结晶体节省百分比。大于1表示使用幸运符更划算。</p>
+                    <p><strong>累积期望：</strong>从0级增幅到目标等级的总期望结晶体消耗（考虑失败重来）。</p>
+                    <p><strong>收益比：</strong>不使用幸运符相对使用时的成本比例。大于1表示使用幸运符更划算。</p>
+                    <p><strong>单级期望：</strong>从前一级增幅到当前等级的期望消耗（考虑失败概率）。</p>
+                    <p><strong>幸运符消耗：</strong>使用幸运符时的期望消耗量（0-4级不消耗，5-10级每次1张，11-15级每次2张）。</p>
                 </div>
             </div>
         </div>
@@ -128,7 +141,10 @@
                         <tr><td>9</td><td>357</td><td>60%</td><td>-3级 (40%)</td></tr>
                         <tr><td>10</td><td>472</td><td>50%</td><td>-3级 (50%)</td></tr>
                         <tr><td>11</td><td>587</td><td>40%</td><td>归0 (60%)</td></tr>
-                        <tr><td>12</td><td>646</td><td>33%</td><td>归0 (67%)</td></tr>
+                        <tr><td>12</td><td>646</td><td>30%</td><td>归0 (70%)</td></tr>
+                        <tr><td>13</td><td>800</td><td>25%</td><td>归0 (75%)</td></tr>
+                        <tr><td>14</td><td>1000</td><td>20%</td><td>归0 (80%)</td></tr>
+                        <tr><td>15</td><td>1250</td><td>15%</td><td>归0 (85%)</td></tr>
                     </tbody>
                 </table>
                 <div class="charm-info">

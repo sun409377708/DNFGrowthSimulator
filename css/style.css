@@ -265,53 +265,76 @@ header h1 {
     box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
 }
 
-/* 历史记录 */
-.history {
+/* 消费统计 */
+.consumption-stats {
     margin-top: 20px;
 }
 
-.history h3 {
+.consumption-stats h3 {
     color: #00d4ff;
     margin-bottom: 15px;
     font-size: 1.1rem;
     text-align: center;
 }
 
-.history-log {
+.exchange-rate {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 12px;
     padding: 15px;
-    max-height: 200px;
-    overflow-y: auto;
+    margin-bottom: 15px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    -webkit-overflow-scrolling: touch;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.history-item {
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    border-left: 3px solid;
-}
-
-.history-item.success {
-    background: rgba(78, 205, 196, 0.1);
-    border-color: #4ecdc4;
-    color: #4ecdc4;
-}
-
-.history-item.fail {
-    background: rgba(255, 107, 107, 0.1);
-    border-color: #ff6b6b;
-    color: #ff6b6b;
-}
-
-.history-item.normal {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: #00d4ff;
+.exchange-rate label {
     color: #00d4ff;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
+
+.exchange-rate input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    width: 80px;
+    text-align: center;
+}
+
+.exchange-rate span {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+}
+
+.stats-info {
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.stats-info p {
+    margin: 0;
+    color: #00d4ff;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.bath-service {
+    margin-top: 8px !important;
+    color: #ff6b6b !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+}
+
+
 
 /* 数学期望表格 */
 .expectations-table-container {
@@ -383,33 +406,213 @@ header h1 {
     color: #00d4ff;
 }
 
-/* 动画效果 */
+/* 炫酷动画效果 */
 .enhance-animation {
-    animation: enhance 0.5s ease-in-out;
+    animation: enhance 0.8s ease-in-out;
+    position: relative;
+    z-index: 10;
 }
 
 .success-animation {
-    animation: success 1s ease-in-out;
+    animation: success 1.5s ease-in-out, successPulse 0.3s ease-in-out 1.2s;
+    position: relative;
+    z-index: 10;
+}
+
+.success-animation::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: successRipple 1.5s ease-out;
+    pointer-events: none;
+    z-index: -1;
 }
 
 .fail-animation {
-    animation: fail 1s ease-in-out;
+    animation: fail 1.2s ease-in-out, failShake 0.1s ease-in-out 1s 3;
+    position: relative;
+    z-index: 10;
 }
 
+.fail-animation::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: radial-gradient(circle, rgba(255, 0, 0, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: failCrack 1.2s ease-out;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* 增幅过程动画 - 充能效果 */
 @keyframes enhance {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    0% { 
+        transform: scale(1) rotate(0deg);
+        box-shadow: 0 0 0 rgba(0, 212, 255, 0);
+    }
+    25% { 
+        transform: scale(1.02) rotate(1deg);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    50% { 
+        transform: scale(1.05) rotate(0deg);
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        filter: brightness(1.2) contrast(1.1);
+    }
+    75% { 
+        transform: scale(1.02) rotate(-1deg);
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    100% { 
+        transform: scale(1) rotate(0deg);
+        box-shadow: 0 0 0 rgba(0, 212, 255, 0);
+    }
 }
 
+/* 成功动画 - 绿光效果 */
 @keyframes success {
-    0%, 100% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.1); filter: brightness(1.5); }
+    0% { 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(0, 255, 0, 0);
+    }
+    15% {
+        transform: scale(1.15) rotate(5deg);
+        filter: brightness(1.5);
+        box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+    }
+    30% {
+        transform: scale(1.25) rotate(-3deg);
+        filter: brightness(2);
+        box-shadow: 0 0 80px rgba(0, 255, 0, 0.9),
+                    0 0 120px rgba(0, 255, 0, 0.6);
+    }
+    50% {
+        transform: scale(1.1) rotate(2deg);
+        filter: brightness(1.5);
+        box-shadow: 0 0 60px rgba(0, 255, 0, 0.7);
+    }
+    75% {
+        transform: scale(1.05) rotate(-1deg);
+        filter: brightness(1.2);
+        box-shadow: 0 0 30px rgba(0, 255, 0, 0.4);
+    }
+    100% { 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(0, 255, 0, 0);
+    }
 }
 
+/* 失败动画 - 红光效果 */
 @keyframes fail {
-    0%, 100% { transform: scale(1); filter: hue-rotate(0deg); }
-    25% { transform: scale(0.95); filter: hue-rotate(180deg); }
-    75% { transform: scale(1.05); filter: hue-rotate(180deg); }
+    0% { 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(255, 0, 0, 0);
+    }
+    10% {
+        transform: scale(0.95) rotate(-5deg);
+        filter: brightness(0.7);
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+    }
+    20% {
+        transform: scale(1.05) rotate(3deg);
+        filter: brightness(0.4);
+        box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+    }
+    30% {
+        transform: scale(0.9) rotate(-8deg);
+        filter: brightness(0.3);
+        box-shadow: 0 0 40px rgba(255, 0, 0, 0.9),
+                    0 0 80px rgba(255, 0, 0, 0.5);
+    }
+    45% {
+        transform: scale(1.1) rotate(6deg);
+        filter: brightness(0.5);
+        box-shadow: 0 0 60px rgba(255, 0, 0, 0.7);
+    }
+    60% {
+        transform: scale(0.95) rotate(-4deg);
+        filter: brightness(0.6);
+        box-shadow: 0 0 35px rgba(255, 0, 0, 0.5);
+    }
+    75% {
+        transform: scale(1.02) rotate(2deg);
+        filter: brightness(0.8);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    }
+    90% {
+        transform: scale(0.98) rotate(-1deg);
+        filter: brightness(0.9);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+    }
+    100% { 
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+/* 成功脉冲动画 */
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* 成功波纹动画 */
+@keyframes successRipple {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+/* 失败震动动画 */
+@keyframes failShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* 失败裂纹动画 */
+@keyframes failCrack {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+        filter: blur(0px);
+    }
+    30% {
+        opacity: 0.8;
+        filter: blur(1px);
+    }
+    60% {
+        transform: scale(1.5);
+        opacity: 0.3;
+        filter: blur(2px);
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+        filter: blur(3px);
+    }
 }
 
 /* 隐藏桌面端样式 */
